@@ -1,11 +1,11 @@
 train_pipeline = [
-    dict(type='LoadImageFromNpyFile'),
+    dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations'),
     dict(type='PackSegInputs')
 ]
 
 test_pipeline = [
-    dict(type='LoadImageFromNpyFile'),
+    dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations'),
     dict(type='PackSegInputs')
 ]
@@ -20,7 +20,7 @@ train_dataloader = dict(
         type='HSIFacade',
         data_root='data/LIB-HSI',
         data_prefix=dict(
-            img_path='train/rgb', seg_map_path='training/labels'),
+            img_path='train/rgb', seg_map_path='train/labels'),
         pipeline=train_pipeline))
 
 
