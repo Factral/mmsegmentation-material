@@ -48,8 +48,6 @@ def merge_args_to_config(cfg, args):
     exp_name = f'/{args.model_name}/exp_{run_time}'
     cfg.work_dir =  args.work_dir + exp_name
 
-    cfg.data_root = args.data_root + '/'
-
     # Set seed thus the results are more reproducible
     # cfg.seed = 0
     set_random_seed(0, deterministic=False)
