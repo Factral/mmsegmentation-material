@@ -1,20 +1,22 @@
-# Copyright (c) OpenMMLab. All rights reserved.
 import argparse
 import logging
 import os
-import os.path as osp
+import datetime
 
 from mmengine.config import Config, DictAction
 from mmengine.logging import print_log
-from mmengine.runner import Runner
+from mmengine.runner import set_random_seed, Runner
 
 from mmseg.registry import RUNNERS
-
+import wandb
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a segmentor')
     parser.add_argument('config', help='train config file path')
-    parser.add_argument('--work-dir', help='the dir to save logs and models')
+    parser.add_argument('model_name', type=str, 
+        help='model name, used for creating experiment folder')
+    parser.add_argument('--work-dir', type=str, default='./output',
+        help='working folder which contains checkpoint files, log, etc.')
     parser.add_argument(
         '--resume',
         action='store_true',
@@ -26,48 +28,55 @@ def parse_args():
         default=False,
         help='enable automatic-mixed-precision training')
     parser.add_argument(
-        '--cfg-options',
-        nargs='+',
-        action=DictAction,
-        help='override some settings in the used config, the key-value pair '
-        'in xxx=yyy format will be merged into config file. If the value to '
-        'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
-        'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
-        'Note that the quotation marks are necessary and that no white space '
-        'is allowed.')
-    parser.add_argument(
         '--launcher',
         choices=['none', 'pytorch', 'slurm', 'mpi'],
         default='none',
         help='job launcher')
-    # When using PyTorch version >= 2.0.0, the `torch.distributed.launch`
-    # will pass the `--local-rank` parameter to `tools/train.py` instead
-    # of `--local_rank`.
     parser.add_argument('--local_rank', '--local-rank', type=int, default=0)
+    parser.add_argument('--wandb', default=False, action=argparse.BooleanOptionalAction, help='Use wandb')
     args = parser.parse_args()
+
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
 
     return args
 
 
+def merge_args_to_config(cfg, args):
+    # Set up working dir to save files and logs.
+    run_time = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+    exp_name = f'/{args.model_name}/exp_{run_time}'
+    cfg.work_dir =  args.work_dir + exp_name
+
+    # Set seed thus the results are more reproducible
+    # cfg.seed = 0
+    set_random_seed(0, deterministic=False)
+
+    # support wandb
+    cfg.visualizer.vis_backends.append(dict(
+        type='WandbVisBackend',
+        init_kwargs=dict(
+            project='transformer-material-segmentation',
+            name=f'{exp_name}',
+            group=args.model_name)))
+    
+    cfg.launcher=args.launcher
+
+    return cfg
+
+
+
 def main():
     args = parse_args()
+
+    if args.wandb:
+        wandb.login(key='fe0119224af6709c85541483adf824cec731879e')
 
     # load config
     cfg = Config.fromfile(args.config)
     cfg.launcher = args.launcher
-    if args.cfg_options is not None:
-        cfg.merge_from_dict(args.cfg_options)
 
-    # work_dir is determined in this priority: CLI > segment in file > filename
-    if args.work_dir is not None:
-        # update configs according to CLI args if args.work_dir is not None
-        cfg.work_dir = args.work_dir
-    elif cfg.get('work_dir', None) is None:
-        # use config filename as default work_dir if cfg.work_dir is None
-        cfg.work_dir = osp.join('./work_dirs',
-                                osp.splitext(osp.basename(args.config))[0])
+    cfg = merge_args_to_config(cfg, args)
 
     # enable automatic-mixed-precision training
     if args.amp is True:
@@ -84,17 +93,12 @@ def main():
             cfg.optim_wrapper.type = 'AmpOptimWrapper'
             cfg.optim_wrapper.loss_scale = 'dynamic'
 
+
     # resume training
     cfg.resume = args.resume
-
+    
     # build the runner from config
-    if 'runner_type' not in cfg:
-        # build the default runner
-        runner = Runner.from_cfg(cfg)
-    else:
-        # build customized runner from the registry
-        # if 'runner_type' is set in the cfg
-        runner = RUNNERS.build(cfg)
+    runner = Runner.from_cfg(cfg)
 
     # start training
     runner.train()
