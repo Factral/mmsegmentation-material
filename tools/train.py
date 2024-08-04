@@ -1,8 +1,6 @@
-# Copyright (c) OpenMMLab. All rights reserved.
 import argparse
 import logging
 import os
-import os.path as osp
 import datetime
 
 from mmengine.config import Config, DictAction
@@ -37,9 +35,9 @@ def parse_args():
     parser.add_argument('--local_rank', '--local-rank', type=int, default=0)
     parser.add_argument('--wandb', default=False, action=argparse.BooleanOptionalAction, help='Use wandb')
     args = parser.parse_args()
+
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
-
 
     return args
 
@@ -55,9 +53,6 @@ def merge_args_to_config(cfg, args):
     # Set seed thus the results are more reproducible
     # cfg.seed = 0
     set_random_seed(0, deterministic=False)
-
-    # We can also use tensorboard to log the training process
-    # cfg.visualizer.vis_backends.append({"type":'TensorboardVisBackend'})
 
     # support wandb
     cfg.visualizer.vis_backends.append(dict(
@@ -85,16 +80,6 @@ def main():
 
     cfg = merge_args_to_config(cfg, args)
 
-
-    # work_dir is determined in this priority: CLI > segment in file > filename
-    if args.work_dir is not None:
-        # update configs according to CLI args if args.work_dir is not None
-        cfg.work_dir = args.work_dir
-    elif cfg.get('work_dir', None) is None:
-        # use config filename as default work_dir if cfg.work_dir is None
-        cfg.work_dir = osp.join('./work_dirs',
-                                osp.splitext(osp.basename(args.config))[0])
-
     # enable automatic-mixed-precision training
     if args.amp is True:
         optim_wrapper = cfg.optim_wrapper.type
@@ -110,8 +95,9 @@ def main():
             cfg.optim_wrapper.type = 'AmpOptimWrapper'
             cfg.optim_wrapper.loss_scale = 'dynamic'
 
+
     # resume training
-    cfg.resume = args.resu
+    cfg.resume = args.resume
     
     # build the runner from config
     runner = Runner.from_cfg(cfg)
