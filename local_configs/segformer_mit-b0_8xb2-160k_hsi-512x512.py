@@ -14,7 +14,7 @@ optim_wrapper = dict(
     _delete_=True,
     type='OptimWrapper',
     optimizer=dict(
-        type='AdamW', lr=0.00006, betas=(0.9, 0.999), weight_decay=0.01),
+        type='AdamW', lr=0.003, betas=(0.9, 0.999), weight_decay=0.01),
     paramwise_cfg=dict(
         custom_keys={
             'pos_block': dict(decay_mult=0.),
@@ -24,12 +24,12 @@ optim_wrapper = dict(
 
 param_scheduler = [
     dict(
-        type='LinearLR', start_factor=1e-6, by_epoch=True, begin=0, end=10),
+        type='LinearLR', start_factor=1e-6, by_epoch=True, begin=0, end=20),
     dict(
         type='PolyLR',
         eta_min=0.0,
         power=1.0,
-        begin=10,
+        begin=20,
         end=200,
         by_epoch=True,
     )
@@ -37,3 +37,10 @@ param_scheduler = [
 train_dataloader = dict(batch_size=32, num_workers=4)
 val_dataloader = dict(batch_size=16, num_workers=4)
 test_dataloader = val_dataloader
+
+model =  dict(
+    decode_head=dict(loss_decode=[
+    dict(type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
+    dict(type='DiceLoss', loss_name='loss_dice', loss_weight=3.0)
+    ])
+    )
