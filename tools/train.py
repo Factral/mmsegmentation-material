@@ -57,8 +57,9 @@ def merge_args_to_config(cfg, args):
         type='WandbVisBackend',
         init_kwargs=dict(
             project='transformer-material-segmentation',
-            name=f'{exp_name}'),
-        group=args.model_name)
+            name=f'{exp_name}',
+            group=args.model_name)
+        )
         )
     
     cfg.launcher=args.launcher

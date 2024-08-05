@@ -23,4 +23,4 @@ default_hooks = dict(
     logger=dict(type='LoggerHook', interval=20, log_metric_by_epoch=True),
     param_scheduler=dict(type='ParamSchedulerHook'),
     checkpoint=dict(type='CheckpointHook', by_epoch=True, interval=20),
-    visualization=dict(type='SegVisualizationHook'), draw=True, interval=1)
+    visualization=dict(type='SegVisualizationHook', draw=True, interval=1))
