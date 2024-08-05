@@ -1,4 +1,5 @@
 default_scope = 'mmseg'
+
 env_cfg = dict(
     cudnn_benchmark=True,
     mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0),
@@ -8,7 +9,7 @@ env_cfg = dict(
 vis_backends = [dict(type='LocalVisBackend')]
 
 visualizer = dict(
-    type='SegLocalVisualizer', vis_backends=vis_backends, name='visualizer')
+    type='SegLocalVisualizer', vis_backends=vis_backends, name='wandb_visualizer')
 
 log_processor = dict(by_epoch=False)
 log_level = 'INFO'

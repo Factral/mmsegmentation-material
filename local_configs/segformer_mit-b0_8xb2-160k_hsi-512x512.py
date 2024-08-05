@@ -8,7 +8,7 @@ checkpoint = 'https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/segfor
 model = dict(
     data_preprocessor=data_preprocessor,
     backbone=dict(init_cfg=dict(type='Pretrained', checkpoint=checkpoint)),
-    decode_head=dict(num_classes=150))
+    decode_head=dict(num_classes=44))
 
 optim_wrapper = dict(
     _delete_=True,
@@ -24,16 +24,16 @@ optim_wrapper = dict(
 
 param_scheduler = [
     dict(
-        type='LinearLR', start_factor=1e-6, by_epoch=False, begin=0, end=1500),
+        type='LinearLR', start_factor=1e-6, by_epoch=True, begin=0, end=10),
     dict(
         type='PolyLR',
         eta_min=0.0,
         power=1.0,
-        begin=1500,
-        end=160000,
-        by_epoch=False,
+        begin=10,
+        end=200,
+        by_epoch=True,
     )
 ]
-train_dataloader = dict(batch_size=2, num_workers=2)
-val_dataloader = dict(batch_size=1, num_workers=4)
+train_dataloader = dict(batch_size=32, num_workers=4)
+val_dataloader = dict(batch_size=16, num_workers=4)
 test_dataloader = val_dataloader
