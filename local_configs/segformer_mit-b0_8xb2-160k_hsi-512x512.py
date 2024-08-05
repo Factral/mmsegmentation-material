@@ -1,19 +1,28 @@
 _base_ = [
-    '../configs/segformer/segformer_mit-b1_8xb2-160k_ade20k-512x512.py', './_base_/datasets/hsi_facade.py',
+    './_base_/models/segformer_mit-b0.py', './_base_/datasets/hsi_facade.py',
     './_base_/default_runtime.py', './_base_/schedules/schedule_epoch.py'
 ]
 crop_size = (512, 512)
 data_preprocessor = dict(size=crop_size)
-checkpoint = 'https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/segformer/mit_b0_20220624-7e0fe6dd.pth'  # noqa
+checkpoint = 'https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/segformer/mit_b1_20220624-02e5a6a1.pth'  # noqa
+
+
 model = dict(
     data_preprocessor=data_preprocessor,
-    backbone=dict(init_cfg=dict(type='Pretrained', checkpoint=checkpoint)),
+     backbone=dict(
+        init_cfg=dict(type='Pretrained', checkpoint=checkpoint),
+        embed_dims=64,
+        num_heads=[1, 2, 5, 8],
+        num_layers=[2, 2, 2, 2]),
     decode_head=dict(num_classes=44,
+                     in_channels=[64, 128, 320, 512],
                      loss_decode=[
                     dict(type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
                     dict(type='FocalLoss', loss_name='loss_focal', loss_weight=3.0, alpha=0.25, gamma=2.0)
                     ])
                 )
+
+
 
 optim_wrapper = dict(
     _delete_=True,
