@@ -13,5 +13,17 @@ pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2
 ```
 
  ```bash
+ pip install wandb
+ pip install ftfy
+ pip install regex
+ ```
+
+
+ ```bash
  pip install -e .
  ```
+
+
+```bash
+ source ~/.bashrc
+```
