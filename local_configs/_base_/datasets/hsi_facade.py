@@ -2,7 +2,7 @@ train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations'),
     dict(type='RandomFlip', prob=0.5),
-    dict(type='RandomRotate', prob=0.3, degree=20),
+    dict(type='RandomRotate', prob=0.5, degree=20),
     dict(type='PackSegInputs')
 ]
 

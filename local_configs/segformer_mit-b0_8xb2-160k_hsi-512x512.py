@@ -9,20 +9,22 @@ checkpoint = 'https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/segfor
 
 model = dict(
     data_preprocessor=data_preprocessor,
-     backbone=dict(
+     
+    backbone=dict(
         init_cfg=dict(type='Pretrained', checkpoint=checkpoint),
         embed_dims=64,
         num_heads=[1, 2, 5, 8],
         num_layers=[2, 2, 2, 2]),
-    decode_head=dict(num_classes=44,
+
+    decode_head=dict(num_classes=44, # 44 ' = 40 clean classes
                      in_channels=[64, 128, 320, 512],
                      loss_decode=[
                     #dict(type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
-                    dict(type='FocalLoss', loss_name='loss_focal', loss_weight=2.0, alpha=0.25, gamma=2.0),
-                    dict(type='DiceLoss', loss_name='loss_dice', loss_weight=3.0, use_sigmoid=False),
+                    dict(type='FocalLoss', loss_name='loss_focal', loss_weight=3.0, alpha=0.25, gamma=2.0)
+                    #dict(type='DiceLoss', loss_name='loss_dice', loss_weight=3.0, use_sigmoid=False),
+
                     ])
                 )
-
 
 
 optim_wrapper = dict(
@@ -49,6 +51,6 @@ param_scheduler = [
         by_epoch=True,
     )
 ]
-train_dataloader = dict(batch_size=32, num_workers=4)
-val_dataloader = dict(batch_size=16, num_workers=4)
+train_dataloader = dict(batch_size=32, num_workers=16)
+val_dataloader = dict(batch_size=16, num_workers=16)
 test_dataloader = val_dataloader
