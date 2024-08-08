@@ -19,8 +19,8 @@ model = dict(
     decode_head=dict(num_classes=44, # 44 ' = 40 clean classes
                      in_channels=[64, 128, 320, 512],
                      loss_decode=[
-                    #dict(type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
-                    dict(type='FocalLoss', loss_name='loss_focal', loss_weight=3.0, alpha=0.25, gamma=2.0)
+                    dict(type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
+                    #dict(type='FocalLoss', loss_name='loss_focal', loss_weight=3.0, alpha=0.25, gamma=2.0)
                     #dict(type='DiceLoss', loss_name='loss_dice', loss_weight=3.0, use_sigmoid=False),
 
                     ])
